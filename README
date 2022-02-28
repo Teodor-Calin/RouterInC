@@ -1,0 +1,24 @@
+Nume si prenume : Calin Teodor-Georgian
+
+
+	Dupa initializarea variabilelor de care este nevoie, se deschide fisierul ce contine intrarile tabelei de rutare, se afla si se pastreaza numarul de intrari(linii) ale acestuia, apoi se reasaza pointerul la inceputul fisierului, pentru citirea propriuzisa a intrarilor si parsarea acestora intr-o structura.
+	Se creeaza, de asemenea, o tabera ARP.
+	Se intra, apoi, in structura "while", adica routerul este gata sa primeasca pachete pana cand acesta este oprit. Astfel, de fiecare daca cand acesta primeste un pachet, se parcurg urmatoarele:
+	Se obtine header-ul Ethernet, apoi se afla daca pachetul este de tip IP. 
+
+1)	In caz afirmativ, se obtine header-ul IP si cel ICMP.
+	Daca header-ul ICMP exista (adica pachetul este de tip ICMP) si este ICMP_ECHO, atunci se trimite un mesaj de raspuns sursei si se arunca pachetul.
+	Se verifica daca TTL este <= 1, iar in caz afirmativ se trimite un pachet ICMP de tip "Time limit exceeded".
+	Se verifica checksum-ul, se decrementeaza TTl-ul, se reface checksum-ul.
+	Se cauta cea mai buna cale din tabela de rutare (functia folosita este cea din laborator), iar daca aceasta nu exista se trimite un pachet ICMP de tip "Destination unreachable".
+	Daca adresa MAC a nexthop-ului nu se afla in tabela ARP, se trimite un pachet ARP_REQUEST catre nexthop, pentru a-i afla adresa MAC, iar pachetul se pastreaza intr-o coada, urmand ca atunci cand aflam adresa MAC a nexthop-ului sa trimitem pachetul catre acesta. In caz contrar, se modifica MAC-urile din header-ul Ethernet si se trimite pachetul mai departe.
+
+2) Daca pachetul nu este tip IP, se obtine header-ul ARP, iar daca acesta exista (adica daca pachetul este intr-adevar de tip ARP, asa cum ne asteptam), exista 2 cazuri:
+	Pachetul este de tip ARP_REQUEST: sursa vrea sa afle adresa noastra MAC; se trimite inapoi sursei un pachet de tip ARP_REPLY, care va contine in header-ul Ethernet adresa noastra MAC.
+	Pachetul este de tip ARP_REPLY: Se adauga in tabela ARP o intrare cu adresele IP si MAC a sursei. Se scoate primul pachet din coada (considerand ca acesta este cel care astepta adresa MAC abia primita), se completeaza adresa MAC a nexthop-ului si se trimite mai departe.	
+	
+
+Probleme intampinate:
+	- testarea manuala a algoritmului este mai putin la indemana decat in cazul altor teme, notiunile cu care am lucrat la acesta tema fiind mai "abstracte".
+	- intelegerea pe deplin a interfetelor si a faptului ca interfata pe care primesc un pachet si cea pe care trimit un pachet sunt diferite.
+	- big_endian -> little_endian si invers
